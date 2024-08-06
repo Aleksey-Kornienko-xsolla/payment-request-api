@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const allowedCardNetworks = ["AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA"];
+        const allowedCardAuthMethods = ["PAN_ONLY", "CRYPTOGRAM_3DS"];
+        function createPaymentRequest() {
+            // Add support for the Google Pay API.
+            const methodData = [{
+                supportedMethods: 'https://google.com/pay',
+                data: getGooglePaymentsConfiguration()
+            }];
+
+            const details = {
+                total: {label: 'Test Purchase', amount: {currency: 'USD', value: '1.00'}}
+            };
+
+            const options = {
+                requestPayerEmail: true,
+                requestPayerName: true
+            };
+
+            return new PaymentRequest(methodData, details);
+        }
+
+        /**
+         * Define your unique Google Pay API configuration
+         *
+         * @returns {object} data attribute suitable for PaymentMethodData
+         */
+        function getGooglePaymentsConfiguration() {
+            return {
+                environment: 'TEST',
+                apiVersion: 2,
+                apiVersionMinor: 0,
+                merchantInfo: {
+                    // A merchant ID is available after approval by Google.
+                    // 'merchantId':'12345678901234567890',
+                    merchantName: 'Example Merchant'
+                },
+                allowedPaymentMethods: [{
+                    type: 'CARD',
+                    parameters: {
+                        allowedAuthMethods: allowedCardAuthMethods,
+                        allowedCardNetworks: allowedCardNetworks
+                    },
+                    tokenizationSpecification: {
+                        type: 'PAYMENT_GATEWAY',
+                        // Check with your payment gateway on the parameters to pass.
+                        // @see {@link https://developers.google.com/pay/api/web/reference/request-objects#gateway}
+                        parameters: {
+                            'gateway': 'example',
+                            'gatewayMerchantId': 'exampleGatewayMerchantId'
+                        }
+                    }
+                }]
+            };
+        }
+        createPaymentRequest().canMakePayment().then((result) => {
+            console.log('can make payment ', result);
+        })
+    </script>
+</body>
+</html>
